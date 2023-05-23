@@ -2,7 +2,7 @@
 
 namespace AtonTestTask.Web.DTOModels
 {
-    public class UpdateUserPasswordDTO: UpdateUserDTO
+    public class UpdateUserPasswordDTO: BaseUserDTO
     {
         [Required]
         [MaxLength(100)]

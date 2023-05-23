@@ -4,35 +4,38 @@
         <name>AtonTestTask.Web</name>
     </assembly>
     <members>
-        <member name="M:AtonTestTask.Web.Controllers.UserController.Create(AtonTestTask.Web.DTOModels.CreateUserDTO)">
+        <member name="M:AtonTestTask.Web.Controllers.UsersController.Create(AtonTestTask.Web.DTOModels.CreateUserDTO)">
             <summary>
             Создание пользователя
             </summary>
             <param name="userDto">Пользователь</param>
             <returns></returns>
         </member>
-        <member name="M:AtonTestTask.Web.Controllers.UserController.UpdateInfo(AtonTestTask.Web.DTOModels.UpdateUserInfoDTO)">
+        <member name="M:AtonTestTask.Web.Controllers.UsersController.UpdateInfo(AtonTestTask.Web.DTOModels.UpdateUserInfoDTO,System.String)">
             <summary>
             Изменение имени, гендера или даты рождения пользователя
             </summary>
             <param name="userDto">Пользователь</param>
+            <param name="userLogin">Логин изменяемого пользователя</param>
             <returns></returns>
         </member>
-        <member name="M:AtonTestTask.Web.Controllers.UserController.UpdatePassword(AtonTestTask.Web.DTOModels.UpdateUserPasswordDTO)">
+        <member name="M:AtonTestTask.Web.Controllers.UsersController.UpdatePassword(AtonTestTask.Web.DTOModels.UpdateUserPasswordDTO,System.String)">
             <summary>
             Изменение пароля пользователя
             </summary>
+            <param name="userLogin">Логин изменяемого пользователя</param>
             <param name="userDto">Пользователь</param>
             <returns></returns>
         </member>
-        <member name="M:AtonTestTask.Web.Controllers.UserController.UpdateLogin(AtonTestTask.Web.DTOModels.UpdateUserLoginDTO)">
+        <member name="M:AtonTestTask.Web.Controllers.UsersController.UpdateLogin(AtonTestTask.Web.DTOModels.UpdateUserLoginDTO,System.String)">
             <summary>
             Изменение логина пользователя
             </summary>
+            <param name="userLogin">Логин изменяемого пользователя</param>
             <param name="userDto">Пользователь</param>
             <returns></returns>
         </member>
-        <member name="M:AtonTestTask.Web.Controllers.UserController.Recovery(AtonTestTask.Web.DTOModels.BaseUserDTO,System.String)">
+        <member name="M:AtonTestTask.Web.Controllers.UsersController.Recovery(AtonTestTask.Web.DTOModels.BaseUserDTO,System.String)">
             <summary>
             Восстановление пользователя
             </summary>
@@ -40,7 +43,7 @@
             <param name="userLogin">Логин пользователя</param>
             <returns></returns>
         </member>
-        <member name="M:AtonTestTask.Web.Controllers.UserController.GetActive(System.String,System.String)">
+        <member name="M:AtonTestTask.Web.Controllers.UsersController.GetActive(System.String,System.String)">
             <summary>
             Получение всех активных пользователей
             </summary>
@@ -48,7 +51,7 @@
             <param name="password">Пароль автора запроса</param>
             <returns></returns>
         </member>
-        <member name="M:AtonTestTask.Web.Controllers.UserController.GetUserByLogin(System.String,System.String,System.String)">
+        <member name="M:AtonTestTask.Web.Controllers.UsersController.GetUserByLogin(System.String,System.String,System.String)">
             <summary>
             Получение информации о пользователе по его логину
             </summary>
@@ -57,7 +60,7 @@
             <param name="userLogin">Логин искомого пользователя</param>
             <returns></returns>
         </member>
-        <member name="M:AtonTestTask.Web.Controllers.UserController.GetUser(System.String,System.String,System.String,System.String)">
+        <member name="M:AtonTestTask.Web.Controllers.UsersController.GetUser(System.String,System.String,System.String,System.String)">
             <summary>
             Получение информации о пользователе по логину и паролю
             </summary>
@@ -67,7 +70,7 @@
             <param name="userPassword">Пароль искомого пользователя</param>
             <returns></returns>
         </member>
-        <member name="M:AtonTestTask.Web.Controllers.UserController.GetUsers(System.String,System.String,System.Int32)">
+        <member name="M:AtonTestTask.Web.Controllers.UsersController.GetUsers(System.String,System.String,System.Int32)">
             <summary>
             Получение всех пользователей старше определённого возраста
             </summary>
@@ -76,7 +79,7 @@
             <param name="age">Возраст по котором производится фильтрация</param>
             <returns></returns>
         </member>
-        <member name="M:AtonTestTask.Web.Controllers.UserController.DeleteUser(AtonTestTask.Web.DTOModels.DeleteUserDTO,System.String)">
+        <member name="M:AtonTestTask.Web.Controllers.UsersController.DeleteUser(AtonTestTask.Web.DTOModels.DeleteUserDTO,System.String)">
             <summary>
             Мягкое или полное удаление пользвателя
             </summary>

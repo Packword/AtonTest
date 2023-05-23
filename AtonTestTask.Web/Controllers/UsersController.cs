@@ -8,11 +8,11 @@ namespace AtonTestTask.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class UsersController : ControllerBase
     {
         IUserService _userService;
 
-        public UserController(IUserService userService)
+        public UsersController(IUserService userService)
         {
             _userService = userService;
         }
@@ -26,10 +26,10 @@ namespace AtonTestTask.Web.Controllers
         public IActionResult Create(CreateUserDTO userDto)
         {
             if (!TryGetAuthor(userDto.RequestUser, out User? reqUser))
-                return BadRequest("Incorrect request user data");
+                return Unauthorized("Incorrect request user data");
 
             if (!IsAdmin(reqUser!))
-                return BadRequest("Access denied!");
+                return StatusCode(StatusCodes.Status403Forbidden, "Access denied!");
 
             User? res = _userService.Add(new User
             {
@@ -45,20 +45,21 @@ namespace AtonTestTask.Web.Controllers
             if (res is null)
                 return BadRequest("Incorrect arguments or dublicate");
 
-            return Ok();
+            return StatusCode(StatusCodes.Status201Created, res);
         }
 
         /// <summary>
         /// Изменение имени, гендера или даты рождения пользователя
         /// </summary>
         /// <param name="userDto">Пользователь</param>
+        /// <param name="userLogin">Логин изменяемого пользователя</param>
         /// <returns></returns>
-        [HttpPut("info/")]
-        public IActionResult UpdateInfo(UpdateUserInfoDTO userDto)
+        [HttpPut("info/{userLogin}")]
+        public IActionResult UpdateInfo(UpdateUserInfoDTO userDto, string userLogin)
         {
-            var validation = ValidateUpdateDTOAndCheckAccess(userDto);
+            var validation = ValidateUpdateDTOAndCheckAccess(userDto, userLogin);
             if (!validation.Res)
-                return BadRequest(validation.Msg);
+                return StatusCode(validation.StatusCode, validation.Msg);
             User reqUser = validation.ReqUser!;
             User updateUser = validation.UpdateUser!;
 
@@ -75,14 +76,15 @@ namespace AtonTestTask.Web.Controllers
         /// <summary>
         /// Изменение пароля пользователя
         /// </summary>
+        /// <param name="userLogin">Логин изменяемого пользователя</param>
         /// <param name="userDto">Пользователь</param>
         /// <returns></returns>
-        [HttpPut("password/")]
-        public IActionResult UpdatePassword(UpdateUserPasswordDTO userDto)
+        [HttpPut("password/{userLogin}")]
+        public IActionResult UpdatePassword(UpdateUserPasswordDTO userDto, string userLogin)
         {
-            var validation = ValidateUpdateDTOAndCheckAccess(userDto);
+            var validation = ValidateUpdateDTOAndCheckAccess(userDto, userLogin);
             if (!validation.Res)
-                return BadRequest(validation.Msg);
+                return StatusCode(validation.StatusCode, validation.Msg);
             User reqUser = validation.ReqUser!;
             User updateUser = validation.UpdateUser!;
 
@@ -97,14 +99,15 @@ namespace AtonTestTask.Web.Controllers
         /// <summary>
         /// Изменение логина пользователя
         /// </summary>
+        /// <param name="userLogin">Логин изменяемого пользователя</param>
         /// <param name="userDto">Пользователь</param>
         /// <returns></returns>
-        [HttpPut("login/")]
-        public IActionResult UpdateLogin(UpdateUserLoginDTO userDto)
+        [HttpPut("login/{userLogin}")]
+        public IActionResult UpdateLogin(UpdateUserLoginDTO userDto, string userLogin)
         {
-            var validation = ValidateUpdateDTOAndCheckAccess(userDto);
+            var validation = ValidateUpdateDTOAndCheckAccess(userDto, userLogin);
             if (!validation.Res)
-                return BadRequest(validation.Msg);
+                return StatusCode(validation.StatusCode, validation.Msg);
             User reqUser = validation.ReqUser!;
             User updateUser = validation.UpdateUser!;
 
@@ -131,10 +134,10 @@ namespace AtonTestTask.Web.Controllers
         public IActionResult Recovery(BaseUserDTO userDto, string userLogin)
         {
             if (!TryGetAuthor(userDto.RequestUser, out User? reqUser))
-                return BadRequest("Incorrect request user data");
+                return Unauthorized("Incorrect request user data");
 
             if (!IsAdmin(reqUser!))
-                return BadRequest("Access denied");
+                return StatusCode(StatusCodes.Status403Forbidden, "Access denied!");
 
             bool recoveryResult = _userService.Recovery(userLogin);
             if (recoveryResult == false)
@@ -154,10 +157,10 @@ namespace AtonTestTask.Web.Controllers
         {
             BaseUserDTO userDto = new BaseUserDTO { RequestUser = new RequestUserDTO { Login = login, Password = password } };
             if (!TryGetAuthor(userDto.RequestUser, out User? reqUser))
-                return BadRequest("Incorrect request user data");
+                return Unauthorized("Incorrect request user data");
 
             if (!IsAdmin(reqUser!))
-                return BadRequest("Access denied");
+                return StatusCode(StatusCodes.Status403Forbidden, "Access denied!");
 
             return Ok(await _userService.GetAll(true));
         }
@@ -174,10 +177,10 @@ namespace AtonTestTask.Web.Controllers
         {
             BaseUserDTO userDto = new BaseUserDTO { RequestUser = new RequestUserDTO { Login = login, Password = password } };
             if (!TryGetAuthor(userDto.RequestUser, out User? reqUser))
-                return BadRequest("Incorrect request user data");
+                return Unauthorized("Incorrect request user data");
 
             if (!IsAdmin(reqUser!))
-                return BadRequest("Access denied");
+                return StatusCode(StatusCodes.Status403Forbidden, "Access denied!");
 
             User? user = _userService.GetByLogin(userLogin);
             if (user is null)
@@ -210,8 +213,11 @@ namespace AtonTestTask.Web.Controllers
         {
             BaseUserDTO userDto = new BaseUserDTO { RequestUser = new RequestUserDTO { Login = login, Password = password } };
             if (!TryGetAuthor(userDto.RequestUser, out User? reqUser))
-                return BadRequest("Incorrect request user data");      // the reqUser and the user we are looking for are identical in this case,
-                                                                       // but we will still search for the user again, since a token or cookies may be used here in the future
+                return Unauthorized("Incorrect request user data");      // the reqUser and the user we are looking for are identical in this case,
+                                                                         // but we will still search for the user again, since a token or cookies may be used here in the future
+            if (!IsUserExistsAndActive(userLogin, reqUser!))
+                return StatusCode(StatusCodes.Status403Forbidden, "Access denied!");
+
             User? user = _userService.GetByLoginPassword(userLogin, userPassword);
             if (user is null)
                 return NotFound();
@@ -231,10 +237,10 @@ namespace AtonTestTask.Web.Controllers
         {
             BaseUserDTO userDto = new BaseUserDTO { RequestUser = new RequestUserDTO { Login = login, Password = password } };
             if (!TryGetAuthor(userDto.RequestUser, out User? reqUser))
-                return BadRequest("Incorrect request user data");
+                return Unauthorized("Incorrect request user data");
 
             if (!IsAdmin(reqUser!))
-                return BadRequest("Access denied");
+                return StatusCode(StatusCodes.Status403Forbidden, "Access denied!");
 
             return Ok(_userService.GetUsersOlderAge(age));
         }
@@ -249,10 +255,10 @@ namespace AtonTestTask.Web.Controllers
         public IActionResult DeleteUser(DeleteUserDTO userDto, string userLogin)
         {
             if (!TryGetAuthor(userDto.RequestUser, out User? reqUser))
-                return BadRequest("Incorrect request user data");
+                return Unauthorized("Incorrect request user data");
 
             if (!IsAdmin(reqUser!))
-                return BadRequest("Access denied");
+                return StatusCode(StatusCodes.Status403Forbidden, "Access denied!");
 
             var res = _userService.Delete(reqUser!.Login, userLogin, userDto.IsSoft);
             if(res.IsFound == false)
@@ -263,19 +269,19 @@ namespace AtonTestTask.Web.Controllers
 
             return Ok();
         }
-        private (bool Res, string Msg, User? ReqUser, User? UpdateUser) ValidateUpdateDTOAndCheckAccess<T>(T userDto) where T: UpdateUserDTO
+        private (bool Res, string Msg, User? ReqUser, User? UpdateUser, int StatusCode) ValidateUpdateDTOAndCheckAccess<T>(T userDto, string login) where T: BaseUserDTO
         {
             if (!TryGetAuthor(userDto.RequestUser, out User? reqUser))
-                return (false, "Incorrect request user data", null, null);
+                return (false, "Incorrect request user data", null, null, StatusCodes.Status401Unauthorized);
 
-            if (!IsAdmin(reqUser!) && !IsUserExistsAndActive(userDto.Login!, reqUser!))
-                return (false, "Access denied!", null, null);
+            if (!IsAdmin(reqUser!) && !IsUserExistsAndActive(login, reqUser!))
+                return (false, "Access denied!", null, null, StatusCodes.Status403Forbidden);
 
-            User? updateUser = _userService.GetByLogin(userDto.Login!);
+            User? updateUser = _userService.GetByLogin(login);
             if (updateUser is null)
-                return (false, "The user being updated was not found", null, null);
+                return (false, "The user being updated was not found", null, null, StatusCodes.Status404NotFound);
 
-            return (true, "", reqUser, updateUser);
+            return (true, "", reqUser, updateUser, 200);
         }
 
         private static bool IsUserExistsAndActive(string login, User reqUser) 

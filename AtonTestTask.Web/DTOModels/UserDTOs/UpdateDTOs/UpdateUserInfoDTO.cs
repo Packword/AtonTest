@@ -2,7 +2,7 @@
 
 namespace AtonTestTask.Web.DTOModels
 {
-    public class UpdateUserInfoDTO: UpdateUserDTO
+    public class UpdateUserInfoDTO: BaseUserDTO
     {
         [MaxLength(100)]
         [RegularExpression(@"^[a-zA-Za-яёА-ЯЁ]+$")]
